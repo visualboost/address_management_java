@@ -1,0 +1,5 @@
+# Ignore output
+target
+
+# Ignore ide files
+.idea
