@@ -11,7 +11,7 @@ import okhttp3.*;
 
 public class API {
 
-  public static final String version = "0.0.5";
+  public static final String version = "0.0.6";
 
   private static API instance;
 
@@ -82,11 +82,21 @@ public class API {
   /**
    * Get all AddressData
    **/
-  public ArrayList<AddressData> getAllAddressData() throws Exception {
+  public ArrayList<AddressData> getAllAddressDataByHousenumberInRadius(
+    int housenumberOfaddress,
+    NearQuery locationOfaddress
+  ) throws Exception {
     Gson gson = JsonSerializer.getInstance().getGson();
 
     Request request = new Request.Builder()
-      .url(getUrl() + "/addressdatas/")
+      .url(
+        getUrl() +
+        "/addressdatas/" +
+        "?housenumberOfaddress=" +
+        housenumberOfaddress +
+        "&locationOfaddress=" +
+        gson.toJson(locationOfaddress)
+      )
       .header("Content-Type", "application/json")
       .header("x-api-key", apiKey)
       .get()
@@ -158,13 +168,22 @@ public class API {
   /**
    * Get all AddressData
    **/
-  public void getAllAddressData(
+  public void getAllAddressDataByHousenumberInRadius(
+    int housenumberOfaddress,
+    NearQuery locationOfaddress,
     AsyncCallback<ArrayList<AddressData>> callback
   ) {
     Gson gson = JsonSerializer.getInstance().getGson();
 
     Request request = new Request.Builder()
-      .url(getUrl() + "/addressdatas/")
+      .url(
+        getUrl() +
+        "/addressdatas/" +
+        "?housenumberOfaddress=" +
+        housenumberOfaddress +
+        "&locationOfaddress=" +
+        gson.toJson(locationOfaddress)
+      )
       .header("Content-Type", "application/json")
       .header("x-api-key", apiKey)
       .get()
