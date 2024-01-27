@@ -13,7 +13,7 @@ import okhttp3.*;
 
 public class API {
 
-  public static final String version = "0.0.2";
+  public static final String version = "0.0.3";
 
   private static API instance;
 
@@ -107,6 +107,33 @@ public class API {
   }
 
   /**
+   * Get all AddressData
+   **/
+  public ArrayList<AddressData> getAllAddressData(String sort, int page)
+    throws Exception {
+    Gson gson = JsonSerializer.getInstance().getGson();
+
+    Request request = new Request.Builder()
+      .url(getUrl() + "/addressdatas/" + "?sort=" + sort + "&page=" + page)
+      .header("Content-Type", "application/json")
+      .header("x-api-key", apiKey)
+      .get()
+      .build();
+
+    Response httpResponse = this.httpClient.newCall(request).execute();
+
+    int statusCode = httpResponse.code();
+    String response = httpResponse.body().string();
+
+    if (statusCode < 200 || statusCode >= 300) {
+      throw new HttpException(statusCode, response);
+    }
+
+    Type type = new TypeToken<ArrayList<AddressData>>() {}.getType();
+    return gson.fromJson(response, type);
+  }
+
+  /**
    * Creates a new AddressData
    **/
   public AddressData createAddressData(CreateAddressDataDto body)
@@ -123,6 +150,31 @@ public class API {
           MediaType.parse("application/json")
         )
       )
+      .build();
+
+    Response httpResponse = this.httpClient.newCall(request).execute();
+
+    int statusCode = httpResponse.code();
+    String response = httpResponse.body().string();
+
+    if (statusCode < 200 || statusCode >= 300) {
+      throw new HttpException(statusCode, response);
+    }
+
+    return gson.fromJson(response, AddressData.class);
+  }
+
+  /**
+   * Delete an existing AddressData
+   **/
+  public AddressData deleteByFirstname(String firstname) throws Exception {
+    Gson gson = JsonSerializer.getInstance().getGson();
+
+    Request request = new Request.Builder()
+      .url(getUrl() + "/addressdata/" + "?firstname=" + firstname)
+      .header("Content-Type", "application/json")
+      .header("x-api-key", apiKey)
+      .delete()
       .build();
 
     Response httpResponse = this.httpClient.newCall(request).execute();
@@ -169,58 +221,6 @@ public class API {
   }
 
   /**
-   * Get all AddressData
-   **/
-  public ArrayList<AddressData> getAllAddressData(String sort, int page)
-    throws Exception {
-    Gson gson = JsonSerializer.getInstance().getGson();
-
-    Request request = new Request.Builder()
-      .url(getUrl() + "/addressdatas/" + "?sort=" + sort + "&page=" + page)
-      .header("Content-Type", "application/json")
-      .header("x-api-key", apiKey)
-      .get()
-      .build();
-
-    Response httpResponse = this.httpClient.newCall(request).execute();
-
-    int statusCode = httpResponse.code();
-    String response = httpResponse.body().string();
-
-    if (statusCode < 200 || statusCode >= 300) {
-      throw new HttpException(statusCode, response);
-    }
-
-    Type type = new TypeToken<ArrayList<AddressData>>() {}.getType();
-    return gson.fromJson(response, type);
-  }
-
-  /**
-   * Delete an existing AddressData
-   **/
-  public AddressData deleteByFirstname() throws Exception {
-    Gson gson = JsonSerializer.getInstance().getGson();
-
-    Request request = new Request.Builder()
-      .url(getUrl() + "/addressdata/firstname=/")
-      .header("Content-Type", "application/json")
-      .header("x-api-key", apiKey)
-      .delete()
-      .build();
-
-    Response httpResponse = this.httpClient.newCall(request).execute();
-
-    int statusCode = httpResponse.code();
-    String response = httpResponse.body().string();
-
-    if (statusCode < 200 || statusCode >= 300) {
-      throw new HttpException(statusCode, response);
-    }
-
-    return gson.fromJson(response, AddressData.class);
-  }
-
-  /**
    * Get a AddressData by _id
    **/
   public void getAddressData(String _id, AsyncCallback<AddressData> callback) {
@@ -231,97 +231,6 @@ public class API {
       .header("Content-Type", "application/json")
       .header("x-api-key", apiKey)
       .get()
-      .build();
-
-    this.httpClient.newCall(request)
-      .enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            callback.onError(e);
-          }
-
-          @Override
-          public void onResponse(Call call, Response httpResponse)
-            throws IOException {
-            int statusCode = httpResponse.code();
-            String response = httpResponse.body().string();
-
-            if (statusCode < 200 || statusCode >= 300) {
-              callback.onError(new HttpException(statusCode, response));
-            }
-
-            callback.onSuccess(gson.fromJson(response, AddressData.class));
-          }
-        }
-      );
-  }
-
-  /**
-   * Creates a new AddressData
-   **/
-  public void createAddressData(
-    CreateAddressDataDto body,
-    AsyncCallback<AddressData> callback
-  ) {
-    Gson gson = JsonSerializer.getInstance().getGson();
-
-    Request request = new Request.Builder()
-      .url(getUrl() + "/addressdata/")
-      .header("Content-Type", "application/json")
-      .header("x-api-key", apiKey)
-      .post(
-        RequestBody.create(
-          gson.toJson(body),
-          MediaType.parse("application/json")
-        )
-      )
-      .build();
-
-    this.httpClient.newCall(request)
-      .enqueue(
-        new Callback() {
-          @Override
-          public void onFailure(Call call, IOException e) {
-            callback.onError(e);
-          }
-
-          @Override
-          public void onResponse(Call call, Response httpResponse)
-            throws IOException {
-            int statusCode = httpResponse.code();
-            String response = httpResponse.body().string();
-
-            if (statusCode < 200 || statusCode >= 300) {
-              callback.onError(new HttpException(statusCode, response));
-            }
-
-            callback.onSuccess(gson.fromJson(response, AddressData.class));
-          }
-        }
-      );
-  }
-
-  /**
-   * Update an existing AddressData
-   **/
-  public void updateAddressData(
-    String _id,
-    UpdateAddressDataDto body,
-    AsyncCallback<AddressData> callback
-  ) {
-    Gson gson = JsonSerializer.getInstance().getGson();
-
-    Request request = new Request.Builder()
-      .url(getUrl() + "/addressdata/" + _id + "/")
-      .header("Content-Type", "application/json")
-      .header("x-api-key", apiKey)
-      .put(
-        RequestBody.create(
-          gson.toJson(body),
-          MediaType.parse("application/json")
-        )
-      )
       .build();
 
     this.httpClient.newCall(request)
@@ -391,16 +300,110 @@ public class API {
   }
 
   /**
-   * Delete an existing AddressData
+   * Creates a new AddressData
    **/
-  public void deleteByFirstname(AsyncCallback<AddressData> callback) {
+  public void createAddressData(
+    CreateAddressDataDto body,
+    AsyncCallback<AddressData> callback
+  ) {
     Gson gson = JsonSerializer.getInstance().getGson();
 
     Request request = new Request.Builder()
-      .url(getUrl() + "/addressdata/firstname=/")
+      .url(getUrl() + "/addressdata/")
+      .header("Content-Type", "application/json")
+      .header("x-api-key", apiKey)
+      .post(
+        RequestBody.create(
+          gson.toJson(body),
+          MediaType.parse("application/json")
+        )
+      )
+      .build();
+
+    this.httpClient.newCall(request)
+      .enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            callback.onError(e);
+          }
+
+          @Override
+          public void onResponse(Call call, Response httpResponse)
+            throws IOException {
+            int statusCode = httpResponse.code();
+            String response = httpResponse.body().string();
+
+            if (statusCode < 200 || statusCode >= 300) {
+              callback.onError(new HttpException(statusCode, response));
+            }
+
+            callback.onSuccess(gson.fromJson(response, AddressData.class));
+          }
+        }
+      );
+  }
+
+  /**
+   * Delete an existing AddressData
+   **/
+  public void deleteByFirstname(
+    String firstname,
+    AsyncCallback<AddressData> callback
+  ) {
+    Gson gson = JsonSerializer.getInstance().getGson();
+
+    Request request = new Request.Builder()
+      .url(getUrl() + "/addressdata/" + "?firstname=" + firstname)
       .header("Content-Type", "application/json")
       .header("x-api-key", apiKey)
       .delete()
+      .build();
+
+    this.httpClient.newCall(request)
+      .enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            callback.onError(e);
+          }
+
+          @Override
+          public void onResponse(Call call, Response httpResponse)
+            throws IOException {
+            int statusCode = httpResponse.code();
+            String response = httpResponse.body().string();
+
+            if (statusCode < 200 || statusCode >= 300) {
+              callback.onError(new HttpException(statusCode, response));
+            }
+
+            callback.onSuccess(gson.fromJson(response, AddressData.class));
+          }
+        }
+      );
+  }
+
+  /**
+   * Update an existing AddressData
+   **/
+  public void updateAddressData(
+    String _id,
+    UpdateAddressDataDto body,
+    AsyncCallback<AddressData> callback
+  ) {
+    Gson gson = JsonSerializer.getInstance().getGson();
+
+    Request request = new Request.Builder()
+      .url(getUrl() + "/addressdata/" + _id + "/")
+      .header("Content-Type", "application/json")
+      .header("x-api-key", apiKey)
+      .put(
+        RequestBody.create(
+          gson.toJson(body),
+          MediaType.parse("application/json")
+        )
+      )
       .build();
 
     this.httpClient.newCall(request)
