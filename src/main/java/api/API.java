@@ -11,7 +11,7 @@ import okhttp3.*;
 
 public class API {
 
-  public static final String version = "0.0.7";
+  public static final String version = "0.0.8";
 
   private static API instance;
 
@@ -116,6 +116,31 @@ public class API {
   }
 
   /**
+   * Delete an existing AddressData
+   **/
+  public AddressData deleteByFirstname(String firstname) throws Exception {
+    Gson gson = JsonSerializer.getInstance().getGson();
+
+    Request request = new Request.Builder()
+      .url(getUrl() + "/addressdata/" + "?firstname=" + firstname)
+      .header("Content-Type", "application/json")
+      .header("x-api-key", apiKey)
+      .delete()
+      .build();
+
+    Response httpResponse = this.httpClient.newCall(request).execute();
+
+    int statusCode = httpResponse.code();
+    String response = httpResponse.body().string();
+
+    if (statusCode < 200 || statusCode >= 300) {
+      throw new HttpException(statusCode, response);
+    }
+
+    return gson.fromJson(response, AddressData.class);
+  }
+
+  /**
    * Get all AddressData
    **/
   public void getAllInRadiusByHousenumber(
@@ -159,6 +184,46 @@ public class API {
 
             Type type = new TypeToken<ArrayList<AddressData>>() {}.getType();
             callback.onSuccess(gson.fromJson(response, type));
+          }
+        }
+      );
+  }
+
+  /**
+   * Delete an existing AddressData
+   **/
+  public void deleteByFirstname(
+    String firstname,
+    AsyncCallback<AddressData> callback
+  ) {
+    Gson gson = JsonSerializer.getInstance().getGson();
+
+    Request request = new Request.Builder()
+      .url(getUrl() + "/addressdata/" + "?firstname=" + firstname)
+      .header("Content-Type", "application/json")
+      .header("x-api-key", apiKey)
+      .delete()
+      .build();
+
+    this.httpClient.newCall(request)
+      .enqueue(
+        new Callback() {
+          @Override
+          public void onFailure(Call call, IOException e) {
+            callback.onError(e);
+          }
+
+          @Override
+          public void onResponse(Call call, Response httpResponse)
+            throws IOException {
+            int statusCode = httpResponse.code();
+            String response = httpResponse.body().string();
+
+            if (statusCode < 200 || statusCode >= 300) {
+              callback.onError(new HttpException(statusCode, response));
+            }
+
+            callback.onSuccess(gson.fromJson(response, AddressData.class));
           }
         }
       );
